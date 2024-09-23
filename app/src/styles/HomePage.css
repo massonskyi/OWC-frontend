@@ -1,0 +1,264 @@
+/* app/src/styles/HomePage.css */
+.nav-text-main-screen {
+    text-align: center;
+    padding: 2rem;
+}
+
+.glitch-h1-home-screen {
+    font-size: 3rem;
+    color: #fff;
+    position: relative;
+    animation: glitch 2s infinite;
+    font-family: 'Arial', sans-serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Добавлена тень */
+}
+
+.glitch-h1-home-screen::before,
+.glitch-h1-home-screen::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+}
+
+.glitch-h1-home-screen::before {
+    left: 2px;
+    text-shadow: -2px 0 red;
+    clip: rect(24px, 550px, 90px, 0);
+    animation: glitch-anim 4s infinite linear alternate-reverse;
+}
+
+.glitch-h1-home-screen::after {
+    left: -2px;
+    text-shadow: -2px 0 blue;
+    clip: rect(85px, 9999px, 140px, 0);
+    animation: glitch-anim2 6s infinite linear alternate-reverse;
+}
+
+@keyframes glitch {
+    0% {
+        text-shadow: 2px 2px #ff4081, -2px -2px #6200ea;
+    }
+    50% {
+        text-shadow: -2px -2px #ff4081, 2px 2px #6200ea;
+    }
+    100% {
+        text-shadow: 2px 2px #ff4081, -2px -2px #6200ea;
+    }
+}
+
+@keyframes glitch-anim {
+    0% {
+        clip: rect(42px, 9999px, 44px, 0);
+        transform: skew(0.3deg);
+    }
+    5% {
+        clip: rect(12px, 9999px, 60px, 0);
+        transform: skew(0.3deg);
+    }
+    10% {
+        clip: rect(85px, 9999px, 140px, 0);
+        transform: skew(0.3deg);
+    }
+    15% {
+        clip: rect(24px, 9999px, 90px, 0);
+        transform: skew(0.3deg);
+    }
+    20% {
+        clip: rect(42px, 9999px, 44px, 0);
+        transform: skew(0.3deg);
+    }
+    25% {
+        clip: rect(12px, 9999px, 60px, 0);
+        transform: skew(0.3deg);
+    }
+    30% {
+        clip: rect(85px, 9999px, 140px, 0);
+        transform: skew(0.3deg);
+    }
+    35% {
+        clip: rect(24px, 9999px, 90px, 0);
+        transform: skew(0.3deg);
+    }
+    40% {
+        clip: rect(42px, 9999px, 44px, 0);
+        transform: skew(0.3deg);
+    }
+    45% {
+        clip: rect(12px, 9999px, 60px, 0);
+        transform: skew(0.3deg);
+    }
+    50% {
+        clip: rect(85px, 9999px, 140px, 0);
+        transform: skew(0.3deg);
+    }
+    55% {
+        clip: rect(24px, 9999px, 90px, 0);
+        transform: skew(0.3deg);
+    }
+    60% {
+        clip: rect(42px, 9999px, 44px, 0);
+        transform: skew(0.3deg);
+    }
+    65% {
+        clip: rect(12px, 9999px, 60px, 0);
+        transform: skew(0.3deg);
+    }
+    70% {
+        clip: rect(85px, 9999px, 140px, 0);
+        transform: skew(0.3deg);
+    }
+    75% {
+        clip: rect(24px, 9999px, 90px, 0);
+        transform: skew(0.3deg);
+    }
+    80% {
+        clip: rect(42px, 9999px, 44px, 0);
+        transform: skew(0.3deg);
+    }
+    85% {
+        clip: rect(12px, 9999px, 60px, 0);
+        transform: skew(0.3deg);
+    }
+    90% {
+        clip: rect(85px, 9999px, 140px, 0);
+        transform: skew(0.3deg);
+    }
+    95% {
+        clip: rect(24px, 9999px, 90px, 0);
+        transform: skew(0.3deg);
+    }
+    100% {
+        clip: rect(42px, 9999px, 44px, 0);
+        transform: skew(0.3deg);
+    }
+}
+
+@keyframes glitch-anim2 {
+    0% {
+        clip: rect(85px, 9999px, 140px, 0);
+        transform: skew(0.3deg);
+    }
+    5% {
+        clip: rect(24px, 9999px, 90px, 0);
+        transform: skew(0.3deg);
+    }
+    10% {
+        clip: rect(42px, 9999px, 44px, 0);
+        transform: skew(0.3deg);
+    }
+    15% {
+        clip: rect(12px, 9999px, 60px, 0);
+        transform: skew(0.3deg);
+    }
+    20% {
+        clip: rect(85px, 9999px, 140px, 0);
+        transform: skew(0.3deg);
+    }
+    25% {
+        clip: rect(24px, 9999px, 90px, 0);
+        transform: skew(0.3deg);
+    }
+    30% {
+        clip: rect(42px, 9999px, 44px, 0);
+        transform: skew(0.3deg);
+    }
+    35% {
+        clip: rect(12px, 9999px, 60px, 0);
+        transform: skew(0.3deg);
+    }
+    40% {
+        clip: rect(85px, 9999px, 140px, 0);
+        transform: skew(0.3deg);
+    }
+    45% {
+        clip: rect(24px, 9999px, 90px, 0);
+        transform: skew(0.3deg);
+    }
+    50% {
+        clip: rect(42px, 9999px, 44px, 0);
+        transform: skew(0.3deg);
+    }
+    55% {
+        clip: rect(12px, 9999px, 60px, 0);
+        transform: skew(0.3deg);
+    }
+    60% {
+        clip: rect(85px, 9999px, 140px, 0);
+        transform: skew(0.3deg);
+    }
+    65% {
+        clip: rect(24px, 9999px, 90px, 0);
+        transform: skew(0.3deg);
+    }
+    70% {
+        clip: rect(42px, 9999px, 44px, 0);
+        transform: skew(0.3deg);
+    }
+    75% {
+        clip: rect(12px, 9999px, 60px, 0);
+        transform: skew(0.3deg);
+    }
+    80% {
+        clip: rect(85px, 9999px, 140px, 0);
+        transform: skew(0.3deg);
+    }
+    85% {
+        clip: rect(24px, 9999px, 90px, 0);
+        transform: skew(0.3deg);
+    }
+    90% {
+        clip: rect(42px, 9999px, 44px, 0);
+        transform: skew(0.3deg);
+    }
+    95% {
+        clip: rect(12px, 9999px, 60px, 0);
+        transform: skew(0.3deg);
+    }
+    100% {
+        clip: rect(85px, 9999px, 140px, 0);
+        transform: skew(0.3deg);
+    }
+}
+
+.description {
+    font-size: 1.2rem;
+    color: #fff;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    font-family: 'Arial', sans-serif;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Добавлена тень */
+}
+
+.button-container {
+    z-index: 2;
+    display: flex;
+    gap: 1rem;
+    flex-direction: column;
+}
+
+.interactive-button {
+    width: 400px; /* Установлен фиксированный размер */
+    transition: transform 0.3s, background-color 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Добавлена тень */
+}
+
+.interactive-button:hover {
+    transform: scale(1.05);
+    background-color: #ff4081;
+}
+
+.page-section {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.page-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+}

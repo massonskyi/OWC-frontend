@@ -46,8 +46,8 @@ body {
 
 /* Светлая тема */
 body.light-theme {
-  background-color: #ffffff;
-  color: #000000;
+  background-color: #f5f5f5;
+  color: #333333;
 }
 
 /* Темная тема */
@@ -96,7 +96,7 @@ body.dark-theme button:hover {
 /* Светлая тема карточек */
 body.light-theme .card {
   background-color: #ffffff;
-  color: #000000;
+  color: #333333;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -115,10 +115,34 @@ body.dark-theme .card {
 
 /* Светлая тема текста */
 body.light-theme .text {
-  color: #000000;
+  color: #333333;
 }
 
 /* Темная тема текста */
 body.dark-theme .text {
   color: #ffffff;
+}
+
+/* Стили для полей ввода */
+input, textarea {
+  background-color: #333333;
+  color: #ffffff;
+  border: 1px solid #555555;
+  padding: 10px;
+  border-radius: 4px;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Светлая тема полей ввода */
+body.light-theme input, body.light-theme textarea {
+  background-color: #ffffff;
+  color: #333333;
+  border: 1px solid #cccccc;
+}
+
+/* Темная тема полей ввода */
+body.dark-theme input, body.dark-theme textarea {
+  background-color: #333333;
+  color: #ffffff;
+  border: 1px solid #555555;
 }

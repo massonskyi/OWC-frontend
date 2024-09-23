@@ -1,81 +1,120 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useParams, Link } from "react-router-dom";
-import {
-  Container,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-  TextField,
-  Box,
-} from "@mui/material";
-import { Edit, Delete, Add } from "@mui/icons-material";
+import React, { useState, useEffect } from 'react';
+import { Box, Grid, Paper, Typography, IconButton, Menu, MenuItem, ListItem, ListItemText, Container, TextField } from '@mui/material';
+import { CreateNewFolder, Edit, InsertDriveFile, Add, Delete } from '@mui/icons-material';
+import { Link, useParams } from 'react-router-dom';
+import { createProject, getProjects, deleteProject } from '../api'; // Импортируем функции API
 
 interface Project {
   id: number;
   name: string;
   language: string;
-  description: string;
 }
 
-const WorkspaceProjectsPage: React.FC = () => {
-  const { workspaceId } = useParams<{ workspaceId: string }>();
-  const [projects, setProjects] = useState<Project[]>([]);
+const ProjectCard = ({ project, onDelete }: { project: Project; onDelete: (id: number) => void }) => {
+  const { workspaceName } = useParams<{ workspaceName: string }>();
+
+  return (
+    <Grid item xs={12} sm={6} md={4}>
+      <Paper
+        sx={{ 
+          p: 2, 
+          borderRadius: 1, 
+          bgcolor: "background.paper",
+          transition: "transform 0.3s",
+          "&:hover": {
+            transform: "scale(1.05)"
+          }
+        }}
+      >
+        <ListItem>
+          <ListItemText primary={project.name} secondary={project.language} />
+          <IconButton component={Link} to={`/workspaces/${workspaceName}/${project.id}`}>
+            <Edit />
+          </IconButton>
+          <IconButton onClick={() => onDelete(project.id)}>
+            <Delete />
+          </IconButton>
+        </ListItem>
+      </Paper>
+    </Grid>
+  );
+};
+
+const WorkspaceProjectsPage = () => {
+  const { workspaceName } = useParams<{ workspaceName: string }>();
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectLanguage, setNewProjectLanguage] = useState('');
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+
+  const fetchProjects = async () => {
+    try {
+      if (workspaceName) {
+        const data = await getProjects(workspaceName);
+        setProjects(data);
+      } else {
+        console.error('Workspace name is undefined');
+      }
+    } catch (error) {
+      console.error('Fetch Projects Error:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await axios.get(`/api/workspaces/${workspaceId}/projects`);
-        setProjects(response.data);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      }
-    };
-
     fetchProjects();
-  }, [workspaceId]);
+  }, [workspaceName]);
 
   const handleAddProject = async () => {
-    if (newProjectName.trim() && newProjectLanguage.trim()) {
-      try {
-        const response = await axios.post(`/api/workspaces/${workspaceId}/projects`, {
+    try {
+      if (workspaceName) {
+        await createProject(workspaceName, {
           name: newProjectName,
           language: newProjectLanguage,
+          description: '',
+          is_active: false
         });
-        setProjects([...projects, response.data]);
-        setNewProjectName('');
-        setNewProjectLanguage('');
-      } catch (error) {
-        console.error("Error adding project:", error);
+        fetchProjects();
+      } else {
+        console.error('Workspace name is undefined');
       }
+    } catch (error) {
+      console.error('Add Project Error:', error);
     }
   };
 
   const handleDeleteProject = async (projectId: number) => {
     try {
-      await axios.delete(`/api/workspaces/${workspaceId}/projects/${projectId}`);
-      setProjects(projects.filter(project => project.id !== projectId));
+      if (workspaceName) {
+        await deleteProject(workspaceName, projectId);
+        fetchProjects();
+      } else {
+        console.error('Workspace name is undefined');
+      }
     } catch (error) {
-      console.error("Error deleting project:", error);
+      console.error('Delete Project Error:', error);
     }
+  };
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
   };
 
   return (
     <Container>
-      <Typography variant="h4">Projects in Workspace {workspaceId}</Typography>
+      <Typography variant="h4">Проекты в Воркспейсе {workspaceName}</Typography>
       <Box display="flex" alignItems="center" mb={2}>
         <TextField
-          label="Project Name"
+          label="Название проекта"
           value={newProjectName}
           onChange={(e) => setNewProjectName(e.target.value)}
           margin="normal"
         />
         <TextField
-          label="Programming Language"
+          label="Язык программирования"
           value={newProjectLanguage}
           onChange={(e) => setNewProjectLanguage(e.target.value)}
           margin="normal"
@@ -84,19 +123,22 @@ const WorkspaceProjectsPage: React.FC = () => {
           <Add />
         </IconButton>
       </Box>
-      <List>
+      <Grid container spacing={2}>
         {projects.map((project) => (
-          <ListItem key={project.id}>
-            <ListItemText primary={project.name} secondary={`${project.language} - ${project.description}`} />
-            <IconButton component={Link} to={`/editor/${project.id}`}>
-              <Edit />
-            </IconButton>
-            <IconButton onClick={() => handleDeleteProject(project.id)}>
-              <Delete />
-            </IconButton>
-          </ListItem>
+          <ProjectCard key={project.id} project={project} onDelete={handleDeleteProject} />
         ))}
-      </List>
+      </Grid>
+      <IconButton onClick={handleMenuClick} color="primary">
+        <Edit />
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleMenuClose}>Редактор</MenuItem>
+        <MenuItem onClick={handleMenuClose}>Создать файл</MenuItem>
+      </Menu>
     </Container>
   );
 };

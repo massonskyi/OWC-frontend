@@ -15,10 +15,9 @@ import NotFoundPage from './components/NotFoundPage';
 import Loader from './components/Loader';
 import AuthPage from './pages/AuthPage';
 import './styles/App.css';
-import './styles/ParticleBackground.css';
-
+import ProjectPage from './pages/ProjectPage';
 const App: React.FC = () => {
-    const { user, workspaces, addWorkspace, deleteWorkspace } = useAuth() || {}; // Предположим, вы добавили workspaces и методы
+    const { user } = useAuth() || {}; // Предположим, вы добавили workspaces и методы
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -45,11 +44,10 @@ const App: React.FC = () => {
                     <Route path="/search" element={<SearchResults />} />
                     <Route path="/workspace" element={<WorkspacesPage />} />
                     <Route path="/workspaces/:workspaceId" element={<WorkspaceProjectsPage />} />
+                    <Route path="/workspaces/name/:workspaceName" element={<WorkspaceProjectsPage />} />
+                    <Route path="/workspaces/:workspaceName/:projectId" element={<ProjectPage />} />
                     <Route path="/profile" element={<UserProfile 
                         user={user} 
-                        workspaces={workspaces} 
-                        onAddWorkspace={addWorkspace} 
-                        onDeleteWorkspace={deleteWorkspace} 
                     />} />
 
                 </Route>

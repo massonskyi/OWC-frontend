@@ -2,6 +2,7 @@ import React, { useState, FormEvent, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { signIn, signUp } from '../api'; // Импортируем функции из API
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { TextField, Button, Box, Container, Typography, Grid } from '@mui/material';
 
 const AuthPage: React.FC = () => {
@@ -10,6 +11,7 @@ const AuthPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation(); // Получаем объект location
   const { login } = useAuth();
+  const { isDarkTheme } = useTheme();
 
   const [loginData, setLoginData] = useState({
     username: '',
@@ -68,7 +70,7 @@ const AuthPage: React.FC = () => {
 
     try {
       const response = await signIn(loginData);
-      login(response.user);
+      login(response.UserProfile, response.token);
       navigate('/'); // Перенаправление на главную страницу
     } catch (error) {
       alert('Failed to log in');
@@ -85,7 +87,7 @@ const AuthPage: React.FC = () => {
 
     try {
       const response = await signUp(registerData);
-      login(response.user);
+      login(response.user, response.token);
       navigate('/'); // Перенаправление на главную страницу после успешной регистрации
     } catch (error) {
       alert('Failed to register');
@@ -95,7 +97,7 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="sm" className={isDarkTheme ? 'dark-theme' : 'light-theme'}>
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8 }}>
         <Typography component="h1" variant="h5">
           {isLogin ? 'Sign In' : 'Sign Up'}
@@ -114,6 +116,12 @@ const AuthPage: React.FC = () => {
               name="username"
               value={loginData.username}
               onChange={handleLoginChange}
+              InputProps={{
+                style: {
+                  backgroundColor: isDarkTheme ? '#333333' : '#ffffff',
+                  color: isDarkTheme ? '#ffffff' : '#333333',
+                },
+              }}
             />
             <TextField
               variant="outlined"
@@ -126,6 +134,12 @@ const AuthPage: React.FC = () => {
               type="password"
               value={loginData.hash_password}
               onChange={handleLoginChange}
+              InputProps={{
+                style: {
+                  backgroundColor: isDarkTheme ? '#333333' : '#ffffff',
+                  color: isDarkTheme ? '#ffffff' : '#333333',
+                },
+              }}
             />
             <Button
               type="submit"
@@ -150,6 +164,12 @@ const AuthPage: React.FC = () => {
               name="name"
               value={registerData.name}
               onChange={handleRegisterChange}
+              InputProps={{
+                style: {
+                  backgroundColor: isDarkTheme ? '#333333' : '#ffffff',
+                  color: isDarkTheme ? '#ffffff' : '#333333',
+                },
+              }}
             />
             <TextField
               variant="outlined"
@@ -161,6 +181,12 @@ const AuthPage: React.FC = () => {
               name="surname"
               value={registerData.surname}
               onChange={handleRegisterChange}
+              InputProps={{
+                style: {
+                  backgroundColor: isDarkTheme ? '#333333' : '#ffffff',
+                  color: isDarkTheme ? '#ffffff' : '#333333',
+                },
+              }}
             />
             <TextField
               variant="outlined"
@@ -172,6 +198,12 @@ const AuthPage: React.FC = () => {
               name="email"
               value={registerData.email}
               onChange={handleRegisterChange}
+              InputProps={{
+                style: {
+                  backgroundColor: isDarkTheme ? '#333333' : '#ffffff',
+                  color: isDarkTheme ? '#ffffff' : '#333333',
+                },
+              }}
             />
             <TextField
               variant="outlined"
@@ -183,6 +215,12 @@ const AuthPage: React.FC = () => {
               name="phone"
               value={registerData.phone}
               onChange={handleRegisterChange}
+              InputProps={{
+                style: {
+                  backgroundColor: isDarkTheme ? '#333333' : '#ffffff',
+                  color: isDarkTheme ? '#ffffff' : '#333333',
+                },
+              }}
             />
             <TextField
               variant="outlined"
@@ -195,6 +233,12 @@ const AuthPage: React.FC = () => {
               type="number"
               value={registerData.age}
               onChange={handleRegisterChange}
+              InputProps={{
+                style: {
+                  backgroundColor: isDarkTheme ? '#333333' : '#ffffff',
+                  color: isDarkTheme ? '#ffffff' : '#333333',
+                },
+              }}
             />
             <TextField
               variant="outlined"
@@ -206,18 +250,12 @@ const AuthPage: React.FC = () => {
               name="username"
               value={registerData.username}
               onChange={handleRegisterChange}
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="hash_password"
-              label="Password"
-              name="hash_password"
-              type="password"
-              value={registerData.hash_password}
-              onChange={handleRegisterChange}
+              InputProps={{
+                style: {
+                  backgroundColor: isDarkTheme ? '#333333' : '#ffffff',
+                  color: isDarkTheme ? '#ffffff' : '#333333',
+                },
+              }}
             />
             <TextField
               variant="outlined"
@@ -227,6 +265,12 @@ const AuthPage: React.FC = () => {
               name="avatar"
               type="file"
               onChange={handleFileChange}
+              InputProps={{
+                style: {
+                  backgroundColor: isDarkTheme ? '#333333' : '#ffffff',
+                  color: isDarkTheme ? '#ffffff' : '#333333',
+                },
+              }}
             />
             <Button
               type="submit"
