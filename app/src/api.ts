@@ -1,3 +1,4 @@
+// import { getWorkspace } from './api'; // Remove this line as it causes a conflict
 import axios, { AxiosResponse } from 'axios';
 
 export interface SignUpData {
@@ -21,6 +22,7 @@ interface ExecCodeData {
   language: string;
 }
 export interface Workspace {
+  files: any;
   id(id: any): void;
   is_active: boolean;
   is_public: boolean;
@@ -46,6 +48,70 @@ export interface ProjectCreateData {
   language: string;
   description: string;
   is_active: boolean;
+}
+
+// Интерфейс для запросов на создание файла или папки
+export interface CreateRequest {
+  name: string; // Имя файла или папки
+}
+
+// Интерфейс для ответа на создание файла или папки
+export interface CreateResponse {
+  message: string; // Сообщение об успешном создании
+  success: boolean; // Успех операции
+}
+
+// Интерфейс для запросов на копирование файла или папки
+export interface CopyRequest {
+  src: string; // Исходный путь файла или папки
+  dst: string; // Назначение копии (путь)
+}
+
+// Интерфейс для ответа на копирование файла или папки
+export interface CopyResponse {
+  message: string; // Сообщение об успешном копировании
+  success: boolean; // Успех операции
+}
+
+// Интерфейс для запросов на удаление файла или папки
+export interface DeleteRequest {
+  path: string; // Путь к файлу или папке для удаления
+}
+
+// Интерфейс для ответа на удаление файла или папки
+export interface DeleteResponse {
+  message: string; // Сообщение об успешном удалении
+  success: boolean; // Успех операции
+}
+
+// Интерфейс для запросов на переименование файла или папки
+export interface RenameRequest {
+  old_name: string; // Старое имя файла или папки
+  new_name: string; // Новое имя файла или папки
+}
+
+// Интерфейс для ответа на переименование файла или папки
+export interface RenameResponse {
+  message: string; // Сообщение об успешном переименовании
+  success: boolean; // Успех операции
+}
+
+// Интерфейс для запросов на редактирование файла
+export interface EditFileRequest {
+  name: string; // Имя файла
+  content: string; // Новое содержимое файла
+}
+
+// Интерфейс для ответа на редактирование файла
+export interface EditFileResponse {
+  message: string; // Сообщение об успешном редактировании
+  success: boolean; // Успех операции
+}
+
+// Общий интерфейс ответа для всех операций (например, копирование, удаление, переименование)
+export interface GenericResponse {
+  message: string; // Сообщение о результате операции
+  success: boolean; // Успех операции
 }
 const address = 'http://127.0.0.1:8000';
 const SERVER_URL = `${address}/api_version_1`
@@ -175,6 +241,7 @@ export const executeCode = async (data: ExecCodeData): Promise<any> => {
     throw new Error(`Error in code execution: ${error.message}`);
   }
 };
+
 export const searchUsers = async (query: string): Promise<any> => {
   try {
     const url = `${SERVER_URL}/search/?query=${query}`;
@@ -193,7 +260,7 @@ export const searchUsers = async (query: string): Promise<any> => {
 
 export const createWorkspace = async (workspaceData: { name: string; description: string; is_active: boolean; is_public: boolean }): Promise<any> => {
   try {
-      const url = `${SERVER_URL}/user/workspaces`;
+      const url = `${SERVER_URL}/user/workspaces/create`;
 
       const params = new URLSearchParams();
       params.append('name', workspaceData.name);
@@ -221,20 +288,22 @@ export const createWorkspace = async (workspaceData: { name: string; description
   }
 };
 
-export const getWorkspace = async (workspaceId: string): Promise<Workspace> => {
-  try {
-      const url = `${SERVER_URL}/user/workspaces/${workspaceId}`;
-      const response: AxiosResponse<Workspace> = await axios.get(url, {
-        headers: getAuthHeaders(),
-        withCredentials: true
-      });
-      return response.data;
-  } catch (error: any) {
-      console.error('Get Workspace Error:', error.response ? error.response.data : error.message);
-      throw error;
+
+
+export const getWorkspaceByName = async (workspaceName: string): Promise<Workspace> => {
+  try{
+    const url = `${SERVER_URL}/user/workspaces/name/${workspaceName}`;
+    const response: AxiosResponse<Workspace> = await axios.get(url, {
+      headers: getAuthHeaders(),
+      withCredentials: true
+    });
+    console.log(response.data)
+    return response.data; 
+  }catch(error: any){
+    console.error('Get Workspace By Name Error:', error.response ? error.response.data : error.message);
+    throw error;
   }
 };
-
 export const getWorkspacesById= async (user_id: string): Promise<Workspace[]> => {
   try {
       const url = `${SERVER_URL}/user/workspaces`;
@@ -251,16 +320,17 @@ export const getWorkspacesById= async (user_id: string): Promise<Workspace[]> =>
 export const getWorkspaces = async (): Promise<Workspace[]> => {
   try {
     const url = `${SERVER_URL}/user/workspaces`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-    });
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch workspaces');
-    }
 
-    const data = await response.json();
+    const response: AxiosResponse<{ workspaces: Workspace[]; message: string }> = await axios.get(
+      url,
+      {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      }
+    );
+
+    const data = response.data;
     const workspaces: Workspace[] = data.workspaces; // Извлекаем массив воркспейсов из объекта
     return workspaces; // Возвращаем массив воркспейсов
   } catch (error) {
@@ -268,11 +338,14 @@ export const getWorkspaces = async (): Promise<Workspace[]> => {
     throw error;
   }
 };
-
-export const createProject = async (workspaceName: string, projectData: ProjectCreateData): Promise<Project> => {
+// Функция для создания файла в рабочей области
+export const createFile = async (workspaceName: string, fileName: string): Promise<CreateResponse> => {
   try {
-    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/projects/`;
-    const response: AxiosResponse<Project> = await axios.post(url, projectData, {
+    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/file`;
+    const requestData: CreateRequest = {
+      name: fileName,
+    };
+    const response: AxiosResponse<CreateResponse> = await axios.post(url, requestData, {
       headers: {
         ...getAuthHeaders(),
         'Content-Type': 'application/json',
@@ -281,43 +354,19 @@ export const createProject = async (workspaceName: string, projectData: ProjectC
     });
     return response.data;
   } catch (error: any) {
-    console.error('Create Project Error:', error.response ? error.response.data : error.message);
+    console.error('Create File Error:', error.response ? error.response.data : error.message);
     throw error;
   }
 };
 
-export const getProject = async (workspaceName: string, projectId: number): Promise<Project> => {
+// Функция для создания папки в рабочей области
+export const createFolder = async (workspaceName: string, folderName: string): Promise<CreateResponse> => {
   try {
-    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/projects/${projectId}`;
-    const response: AxiosResponse<Project> = await axios.get(url, {
-      headers: getAuthHeaders(),
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error: any) {
-    console.error('Get Project Error:', error.response ? error.response.data : error.message);
-    throw error;
-  }
-};
-
-export const getProjects = async (workspaceName: string): Promise<Project[]> => {
-  try {
-    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/projects/`;
-    const response: AxiosResponse<Project[]> = await axios.get(url, {
-      headers: getAuthHeaders(),
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error: any) {
-    console.error('Get Projects Error:', error.response ? error.response.data : error.message);
-    throw error;
-  }
-};
-
-export const updateProject = async (workspaceName: string, projectId: number, projectData: ProjectCreateData): Promise<Project> => {
-  try {
-    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/projects/${projectId}`;
-    const response: AxiosResponse<Project> = await axios.put(url, projectData, {
+    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/folder`;
+    const requestData: CreateRequest = {
+      name: folderName,
+    };
+    const response: AxiosResponse<CreateResponse> = await axios.post(url, requestData, {
       headers: {
         ...getAuthHeaders(),
         'Content-Type': 'application/json',
@@ -326,20 +375,112 @@ export const updateProject = async (workspaceName: string, projectId: number, pr
     });
     return response.data;
   } catch (error: any) {
-    console.error('Update Project Error:', error.response ? error.response.data : error.message);
+    console.error('Create Folder Error:', error.response ? error.response.data : error.message);
     throw error;
   }
 };
 
-export const deleteProject = async (workspaceName: string, projectId: number): Promise<void> => {
+// Функция для копирования файла или папки в рабочей области
+export const copyItem = async (workspaceName: string, src: string, dst: string): Promise<GenericResponse> => {
   try {
-    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/projects/${projectId}`;
-    await axios.delete(url, {
-      headers: getAuthHeaders(),
+    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/copy`;
+    const requestData: CopyRequest = {
+      src,
+      dst,
+    };
+    const response: AxiosResponse<GenericResponse> = await axios.post(url, requestData, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
       withCredentials: true,
     });
+    return response.data;
   } catch (error: any) {
-    console.error('Delete Project Error:', error.response ? error.response.data : error.message);
+    console.error('Copy Item Error:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
+
+// Функция для удаления файла или папки в рабочей области
+export const deleteItem = async (workspaceName: string, path: string): Promise<GenericResponse> => {
+  try {
+    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/item`;
+    const requestData: DeleteRequest = {
+      path,
+    };
+    const response: AxiosResponse<GenericResponse> = await axios.delete(url, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+      data: requestData,
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Delete Item Error:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
+
+// Функция для переименования файла или папки в рабочей области
+export const renameItem = async (workspaceName: string, oldName: string, newName: string): Promise<GenericResponse> => {
+  try {
+    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/rename`;
+    const requestData: RenameRequest = {
+      old_name: oldName,
+      new_name: newName,
+    };
+    const response: AxiosResponse<GenericResponse> = await axios.put(url, requestData, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Rename Item Error:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
+
+// Функция для редактирования содержимого файла в рабочей области
+export const editFile = async (workspaceName: string, fileName: string, content: string): Promise<GenericResponse> => {
+  try {
+    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/file`;
+    const requestData: EditFileRequest = {
+      name: fileName,
+      content,
+    };
+    const response: AxiosResponse<GenericResponse> = await axios.put(url, requestData, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Edit File Error:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
+// Функция для открытия файла в рабочей области
+export const openFile = async (workspaceName: string, fileName: string): Promise<string> => {
+  try {
+    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/file/${fileName}`;
+    const response: AxiosResponse<{ contents: string }> = await axios.get(url, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true,
+    });
+    return response.data.contents;
+  } catch (error: any) {
+    console.error('Open File Error:', error.response ? error.response.data : error.message);
     throw error;
   }
 };

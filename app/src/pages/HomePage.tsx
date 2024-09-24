@@ -5,8 +5,9 @@ import styled from "@emotion/styled";
 import TSPR from "../components/BackgroundParticles";
 import '../styles/ParticleBackground.css';
 import '../styles/HomePage.css';
-import Futures from '../components/FuturesContainer'; // Import the Futures component
-
+import image1 from "../images/1.png";
+import image2 from "../images/2.png";
+import image3 from "../images/3.png";
 interface INavigationLink {
   id: number;
   name: string;
@@ -18,7 +19,7 @@ export const HomePage: React.FC = () => {
     {
       id: 1,
       name: "Text Editor",
-      link: "/editor",
+      link: "/test-editor",
     },
     {
       id: 2,
@@ -31,27 +32,15 @@ export const HomePage: React.FC = () => {
       link: "/auth?mode=sign-up",
     },
   ];
-
-  const sectionRefs = useRef<HTMLDivElement[]>([]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      sectionRefs.current.forEach((section) => {
-        const rect = section.getBoundingClientRect();
-        if (rect.top < window.innerHeight) {
-          section.classList.add("visible");
-        }
-      });
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
+  const handleOpenTextEditor = () => {
+    window.location.href = "/test-editor";
+  }
+  const handleOpenSignIn = () => {
+    window.location.href = "/auth?mode=sign-in";
+  }
+  const handleOpenSignUp = () => {
+    window.location.href = "/auth?mode=sign-up";
+  }
   return (
       <>
         <StrictMode>
@@ -62,19 +51,26 @@ export const HomePage: React.FC = () => {
           <p className="description">
             Добро пожаловать в наш Онлайн Редактор кода! Здесь вы можете писать, редактировать и делиться своим кодом в реальном времени.
           </p>
-          <div className="button-container">
-            {links.map((item) => (
-                <Link key={item.id} to={item.link} style={{ textDecoration: "none" }}>
-                  <Button
-                      variant="contained"
-                      color="secondary"
-                      className="interactive-button"
-                  >
-                    {item.name}
-                  </Button>
-                </Link>
-            ))}
-          </div>
+        </div>
+        <div className="rotated-block">
+          <p>Редактируйте. Творите. </p>
+          <p> Быстро, бесплатно и быстро</p>
+          <img src={image1} alt="Example" />
+          <Button variant="contained" color="primary" onClick={handleOpenTextEditor}>Text Editor</Button>
+        </div>
+        <div style={{ height: "200px" }}></div>
+        <div className="rotated-block-right">
+          <p>Но можно и больше. Сохранять. Делиться. Хранить.</p>
+          <p>Безопастно и комфортно.</p>
+          <img src={image2} alt="Пример изображения" />
+          <Button variant="contained" color="primary" onClick={handleOpenSignIn}>Войти и начать!</Button>
+        </div>
+        <div style={{ height: "200px" }}></div>
+
+        <div className="rotated-block">
+          <p>Храните все свои проекты в одном месте</p>
+          <img src={image3} alt="Пример изображения" />
+          <Button variant="contained" color="primary" onClick={handleOpenSignUp}>Присоединяйтесь к нам уже сейчас!</Button>
         </div>
       </>
   );

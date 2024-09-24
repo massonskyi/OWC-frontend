@@ -8,7 +8,7 @@
     font-size: 3rem;
     color: #fff;
     position: relative;
-    animation: glitch 2s infinite;
+    animation: glitch-text 2s infinite;
     font-family: 'Arial', sans-serif;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Добавлена тень */
 }
@@ -38,7 +38,7 @@
     animation: glitch-anim2 6s infinite linear alternate-reverse;
 }
 
-@keyframes glitch {
+@keyframes glitch-text {
     0% {
         text-shadow: 2px 2px #ff4081, -2px -2px #6200ea;
     }
@@ -244,7 +244,7 @@
 .interactive-button {
     width: 400px; /* Установлен фиксированный размер */
     transition: transform 0.3s, background-color 0.3s;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Добавлена тень */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Добавлена тень */
 }
 
 .interactive-button:hover {
@@ -252,13 +252,144 @@
     background-color: #ff4081;
 }
 
-.page-section {
-    opacity: 0;
-    transform: translateY(50px);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+.rotated-block,
+.rotated-block-right {
+  margin-bottom: 40px; /* Добавление пространства между блоками */
 }
 
-.page-section.visible {
-    opacity: 1;
-    transform: translateY(0);
+.rotated-block {
+  transform: rotateX(10deg) rotateY(25deg); /* Поворот блока по осям X и Y */
+  text-align: center;
+  padding: 20px;
+  /* border: 1px solid #ccc; */
+  background-color: #f9f9f900;
+  perspective: 1000px; /* Добавление перспективы для 3D эффекта */
+  width: 35%;
+  height: 400px;
+}
+
+.rotated-block-right {
+  position: absolute; /* Устанавливаем абсолютное позиционирование */
+  right: 20px; /* Положение блока справа */
+  transform: rotateX(10deg) rotateY(25deg); /* Поворот блока по осям X и Y */
+  text-align: center;
+  padding: 20px;
+  /* border: 1px solid #ccc; */
+  background-color: #f9f9f900;
+  perspective: 1000px; /* Добавление перспективы для 3D эффекта */
+  width: 35%;
+  height: 400px;
+}
+
+.rotated-block p,
+.rotated-block-right p {
+    margin: 10px 0;
+    font-size: 1.5rem; /* Увеличен размер шрифта */
+    font-weight: bold; /* Сделан жирным */
+    color: #fff;
+    position: relative;
+    animation: glitch-text 2s infinite;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Добавлена тень */
+}
+
+.rotated-block p::before,
+.rotated-block p::after,
+.rotated-block-right p::before,
+.rotated-block-right p::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+}
+
+.rotated-block p::before,
+.rotated-block-right p::before {
+    left: 2px;
+    text-shadow: -2px 0 red;
+    clip: rect(24px, 550px, 90px, 0);
+    animation: glitch-anim 4s infinite linear alternate-reverse;
+}
+
+.rotated-block p::after,
+.rotated-block-right p::after {
+    left: -2px;
+    text-shadow: -2px 0 blue;
+    clip: rect(85px, 9999px, 140px, 0);
+    animation: glitch-anim2 6s infinite linear alternate-reverse;
+}
+
+.rotated-block img,
+.rotated-block-right img {
+  max-width: 100%;
+  height: 100%;
+  transform: translateZ(30px); /* 3D эффект */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); /* Тень для объема */
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.rotated-block img:hover,
+.rotated-block-right img:hover {
+  transform: translateZ(50px); /* Увеличение 3D эффекта при наведении */
+  box-shadow: 0 20px 40px rgba(253, 253, 253, 0.7); /* Увеличение тени при наведении */
+}
+
+.rotated-block button,
+.rotated-block-right button {
+  margin-top: 10px;
+  position: relative;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #ff4081;
+  border: none;
+  cursor: pointer;
+  transform: translateZ(20px); /* 3D эффект */
+  box-shadow: 0 5px #999;
+  transition: all 0.3s ease;
+}
+
+.rotated-block button:active,
+.rotated-block-right button:active {
+  transform: translateY(4px) translateZ(20px);
+  box-shadow: 0 2px #666;
+}
+
+.rotated-block button::before,
+.rotated-block button::after,
+.rotated-block-right button::before,
+.rotated-block-right button::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #00ff00, #68078f);
+  z-index: -1;
+  filter: blur(5px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.rotated-block button:hover::before,
+.rotated-block button:hover::after,
+.rotated-block-right button:hover::before,
+.rotated-block-right button:hover::after {
+  opacity: 1;
+  animation: glitch 1s infinite;
+}
+
+@keyframes glitch {
+  0% {
+    clip: rect(0, 100%, 10%, 0);
+  }
+  50% {
+    clip: rect(30%, 100%, 40%, 0);
+  }
+  100% {
+    clip: rect(60%, 100%, 70%, 0);
+  }
 }

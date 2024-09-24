@@ -4,6 +4,7 @@ import { signIn, signUp } from '../api'; // Импортируем функци�
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { TextField, Button, Box, Container, Typography, Grid } from '@mui/material';
+import { toast } from 'react-hot-toast'; // Импортируем toast из react-hot-toast
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true); // Для переключения между входом и регистрацией
@@ -71,9 +72,10 @@ const AuthPage: React.FC = () => {
     try {
       const response = await signIn(loginData);
       login(response.UserProfile, response.token);
+      toast.success('Logged in successfully');
       navigate('/'); // Перенаправление на главную страницу
     } catch (error) {
-      alert('Failed to log in');
+      toast.error('Failed to log in');
     } finally {
       setIsSubmitting(false);
     }
@@ -88,9 +90,10 @@ const AuthPage: React.FC = () => {
     try {
       const response = await signUp(registerData);
       login(response.user, response.token);
+      toast.success('Registered successfully');
       navigate('/'); // Перенаправление на главную страницу после успешной регистрации
     } catch (error) {
-      alert('Failed to register');
+      toast.error('Failed to register');
     } finally {
       setIsSubmitting(false);
     }
@@ -249,6 +252,23 @@ const AuthPage: React.FC = () => {
               label="Username"
               name="username"
               value={registerData.username}
+              onChange={handleRegisterChange}
+              InputProps={{
+                style: {
+                  backgroundColor: isDarkTheme ? '#333333' : '#ffffff',
+                  color: isDarkTheme ? '#ffffff' : '#333333',
+                },
+              }}
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="hash_password"
+              label="Password"
+              name="hash_password"
+              value={registerData.hash_password}
               onChange={handleRegisterChange}
               InputProps={{
                 style: {

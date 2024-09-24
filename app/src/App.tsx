@@ -10,12 +10,12 @@ import AboutPage from './pages/AboutPage';
 import EditorPage from './pages/EditorPage';
 import SearchResults from './pages/SearchResult';
 import WorkspacesPage from './pages/WorkspacesPage';
-import WorkspaceProjectsPage from './pages/WorkspacesProjectPage';
 import NotFoundPage from './components/NotFoundPage';
 import Loader from './components/Loader';
 import AuthPage from './pages/AuthPage';
 import './styles/App.css';
-import ProjectPage from './pages/ProjectPage';
+import UserWorkspacePage from './pages/UserWorkspacePage';
+import { Toaster } from 'react-hot-toast';
 const App: React.FC = () => {
     const { user } = useAuth() || {}; // Предположим, вы добавили workspaces и методы
     const [loading, setLoading] = useState(true);
@@ -31,21 +31,20 @@ const App: React.FC = () => {
 
     return (
         <>
+            <Toaster />
             <Header />
             <Routes>
                 <Route element={<PublicRoute />}>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/about" element={<AboutPage />} />
-                    <Route path="/editor" element={<EditorPage />} />
+                    <Route path="/test-editor" element={<EditorPage />} />
                     <Route path="/404" element={<NotFoundPage />} />
                 </Route>
                 <Route element={<ProtectedRoute />}>
                     <Route path="/search" element={<SearchResults />} />
-                    <Route path="/workspace" element={<WorkspacesPage />} />
-                    <Route path="/workspaces/:workspaceId" element={<WorkspaceProjectsPage />} />
-                    <Route path="/workspaces/name/:workspaceName" element={<WorkspaceProjectsPage />} />
-                    <Route path="/workspaces/:workspaceName/:projectId" element={<ProjectPage />} />
+                    <Route path="/workspace" element={<WorkspacesPage user={user}  />} />
+                    <Route path="/workspaces/:workspaceName/editor" element={<UserWorkspacePage />} />
                     <Route path="/profile" element={<UserProfile 
                         user={user} 
                     />} />

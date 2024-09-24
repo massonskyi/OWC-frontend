@@ -1,17 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { langs } from "@uiw/codemirror-extensions-langs";
-import { vscodeDark } from "@uiw/codemirror-themes-all";
+import {
+  andromeda,
+  androidstudio,
+  atomone,
+  basicLight,
+  basicDark,
+  copilot,
+  dracula,
+  githubDark,
+  githubLight,
+  materialDark,
+  kimbie
+} from "@uiw/codemirror-themes-all";
 import { linter, Diagnostic } from "@codemirror/lint";
 import { syntaxTree } from "@codemirror/language";
 import { ICodeChangeHandler } from "../../interfaces/ITextEditor/ICodeChangeHandler";
 import LanguageSelection from "./LanguageSelector";
 import ExecBtn from "./ExecButton";
+import FileListComponent from "../FileManagerComponents/FileListComponents";
 import Console from "../Console";
-import { Box, Typography, Divider } from "@mui/material";
+import { Box, Typography, Divider, Tabs, Tab, IconButton } from "@mui/material";
 import { Tooltip, showTooltip, hoverTooltip, showPanel, Panel, keymap } from "@codemirror/view";
 import { StateField, StateEffect, EditorState, Text } from "@codemirror/state";
-import { toast } from 'react-hot-toast'; // Импортируем toast из react-hot-toast
+import CloseIcon from '@mui/icons-material/Close';
 
 const regexpLinter = linter((view: EditorView) => {
   let diagnostics: Diagnostic[] = [];
@@ -78,7 +92,6 @@ export function helpPanel() {
   return [helpPanelState, keymap.of(helpKeymap), helpTheme];
 }
 
-// Функция для подсчета слов
 function countWords(doc: Text) {
   const text = doc.toString();
   const words = text.match(/\b\w+\b/g);
@@ -122,24 +135,52 @@ export const wordHover = hoverTooltip((view: EditorView, pos, side) => {
   };
 });
 
-export const TextEditor: React.FC = () => {
-  const [language, setLanguage] = useState<string>("python");
-  const [code, setCode] = useState<string>("print('Hello, world!')");
+const themeList = [
+  { name: "andromeda", theme: andromeda },
+  { name: "androidstudio", theme: androidstudio },
+  { name: "atomone", theme: atomone },
+  { name: "basicLight", theme: basicLight },
+  { name: "basicDark", theme: basicDark },
+  { name: "copilot", theme: copilot },
+  { name: "dracula", theme: dracula },
+  { name: "githubDark", theme: githubDark },
+  { name: "githubLight", theme: githubLight },
+  { name: "materialDark", theme: materialDark },
+  { name: "kimbie", theme: kimbie }
+];
+
+interface TabData {
+  filename: string;
+  code: string;
+  language: string;
+}
+
+export const UserTextEditor: React.FC = () => {
+  const { workspaceName } = useParams<{ workspaceName: string }>();
+  const [tabs, setTabs] = useState<TabData[]>([
+    { filename: "default", code: "print('Hello, world!')", language: "python" }
+  ]);
+  const [activeTab, setActiveTab] = useState<number>(0);
   const [output, setOutput] = useState<string[]>([]);
+  const [theme, setTheme] = useState(themeList[0].theme);
+
   const handlerOutput = (result: string) => {
     setOutput(prev => [...prev, result]);
-    toast.success('Code executed successfully');
   };
 
   const handlerCodeChange: ICodeChangeHandler = (editor) => {
-    setCode(editor);
-    toast.success('Code changed successfully');
+    setTabs(prevTabs => {
+      const newTabs = [...prevTabs];
+      newTabs[activeTab].code = editor;
+      return newTabs;
+    });
   };
 
-  const updateCodeMirrorMode = (selectedLanguage: string) => {
-    setLanguage(selectedLanguage);
-    setCode(getDefaultCode(selectedLanguage));
-    toast.success(`Language changed to ${selectedLanguage}`);
+  const handleThemeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedTheme = themeList.find(theme => theme.name === event.target.value);
+    if (selectedTheme) {
+      setTheme(selectedTheme.theme);
+    }
   };
 
   const cursorTooltipField = StateField.define<readonly Tooltip[]>({
@@ -213,33 +254,109 @@ export const TextEditor: React.FC = () => {
     return mode();
   };
 
+
+  const updateCodeMirrorMode = (selectedLanguage: string) => {
+    setTabs(prevTabs => {
+      const newTabs = [...prevTabs];
+      newTabs[activeTab].language = selectedLanguage;
+      if (newTabs[activeTab].filename === "default") {
+        newTabs[activeTab].code = getDefaultCode(selectedLanguage);
+      }
+      return newTabs;
+    });
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
+
+  const handleTabClose = (index: number) => {
+    setTabs(prevTabs => {
+      const newTabs = prevTabs.filter((_, i) => i !== index);
+      // Обновляем активную вкладку
+      if (activeTab >= index && activeTab > 0) {
+        setActiveTab(activeTab - 1);
+      }
+      return newTabs;
+    });
+  };
+
+  const handleCodeLoaded = (filename: string, code: string) => {
+    setTabs(prevTabs => {
+      const existingTab = prevTabs.find(tab => tab.filename === filename);
+      if (existingTab) {
+        setActiveTab(prevTabs.indexOf(existingTab));
+        return prevTabs;
+      } else {
+        const newTabs = [...prevTabs, { filename, code, language: "python" }];
+        setActiveTab(newTabs.length - 1); // Переключение на новую вкладку
+        return newTabs;
+      }
+    });
+  };
+
   return (
     <Box display="flex" flexDirection="column" sx={{ backgroundColor: "#1e1e1e", height: "100vh", width: "100vw" }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ padding: 2, backgroundColor: "#2a2a2a" }}>
         <Box display="flex" gap={2}>
-          <ExecBtn code={code} language={language} onOutput={handlerOutput} />
+          <ExecBtn code={tabs[activeTab]?.code || ""} language={tabs[activeTab]?.language || "python"} onOutput={handlerOutput} />
           <LanguageSelection onSelectionChange={updateCodeMirrorMode} />
+          <select onChange={handleThemeChange}>
+            {themeList.map((theme) => (
+              <option key={theme.name} value={theme.name}>
+                {theme.name}
+              </option>
+            ))}
+          </select>
         </Box>
+        <Typography variant="h6" sx={{ color: "#fff", marginLeft: 2 }}>
+          {workspaceName}
+        </Typography>
       </Box>
 
       <Box display="flex" flex={1} sx={{ height: "100%" }}>
-        <Box flex={1} padding={2}>
-          <CodeMirror
-            value={code}
-            theme={vscodeDark}
-            extensions={[
-              getMode(language),
-              EditorView.lineWrapping,
-              cursorTooltipField,
-              wordHover,
-              regexpLinter,
-              helpPanel(),
-              wordCounter(),
-            ]}
-            onChange={handlerCodeChange}
-            style={{ width: "100%", maxHeight: "80vh", overflow: "auto", minHeight: "80vh" }}
-          />
+        <Box flex={8} padding={2}>
+          <Tabs value={activeTab} onChange={handleTabChange} aria-label="editor tabs">
+            {tabs.map((tab, index) => (
+              <Tab
+                key={index}
+                label={
+                  <Box display="flex" alignItems="center">
+                    {tab.filename}
+                    {tab.filename !== "default" && (
+                      <IconButton size="small" onClick={() => handleTabClose(index)}>
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
+                }
+              />
+            ))}
+          </Tabs>
+          {tabs.length > 0 && (
+            <CodeMirror
+              value={tabs[activeTab]?.code || ""}
+              theme={theme}
+              extensions={[
+                getMode(tabs[activeTab]?.language || "python"),
+                EditorView.lineWrapping,
+                cursorTooltipField,
+                wordHover,
+                regexpLinter,
+                helpPanel(),
+                wordCounter(),
+              ]}
+              onChange={handlerCodeChange}
+              style={{ width: "100%", maxHeight: "60vh", overflow: "auto", minHeight: "50vh" }}
+            />
+          )}
           <Console output={output} />
+        </Box>
+
+        <Divider orientation="vertical" flexItem sx={{ backgroundColor: "#000" }} />
+
+        <Box flex={2} padding={2} sx={{ backgroundColor: "#282828" }}>
+          <FileListComponent onCodeLoaded={(code) => handleCodeLoaded("filename", code)} workspaceName={workspaceName || ""} />
         </Box>
       </Box>
     </Box>

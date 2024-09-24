@@ -10,9 +10,7 @@ import {
   TextField,
   Box,
   Grid,
-  IconButton,
 } from "@mui/material";
-import { Add, Delete, Edit } from "@mui/icons-material";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import Loader from "../components/Loader"; // Импортируем компонент Loader
 import { getWorkspaces, Workspace } from "../api";
@@ -23,11 +21,26 @@ interface Project {
   language: string; // Язык программирования
 }
 
-const WorkspacesPage: React.FC = () => {
+interface User {
+  id: number;
+  name: string;
+  surname: string;
+  email: string;
+  phone: string;
+  age: number;
+  username: string;
+  avatar: string;
+  hash_password: string;
+}
+
+interface WorkspacesPageProps {
+  user: User;
+}
+
+const WorkspacesPage: React.FC<WorkspacesPageProps> = ({ user }) => {
   const { workspaceName } = useParams<{ workspaceName: string }>();
   const navigate = useNavigate();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectLanguage, setNewProjectLanguage] = useState('');
   const [isLoading, setIsLoading] = useState(true); // Состояние для отслеживания загрузки
@@ -42,22 +55,9 @@ const WorkspacesPage: React.FC = () => {
         console.error('Error fetching workspaces:', error);
       }
     };
-
-    const fetchWorkspaceByName = async (name: string) => {
-      try {
-        const response = await axios.get(`/user/workspaces/name/${name}`);
-        console.log('Fetched workspace by name:', response.data);
-        setProjects(response.data.projects); // Предполагаем, что воркспейс содержит проекты
-      } catch (error) {
-        console.error('Error fetching workspace by name:', error);
-      }
-    };
   
     const fetchData = async () => {
       await fetchWorkspaces();
-      if (workspaceName) {
-        await fetchWorkspaceByName(workspaceName);
-      }
       setTimeout(() => {
         setIsLoading(false); // Устанавливаем isLoading в false после задержки
       }, 1500); // Задержка в 1500 миллисекунд
@@ -65,7 +65,7 @@ const WorkspacesPage: React.FC = () => {
 
     fetchData();
     console.log('Fetching projects for workspace:', workspaceName);
-  }, [workspaceName]);
+  }, [workspaceName, user.id]);
 
   if (isLoading) {
     return <Loader />; // Отображаем Loader, пока данные загружаются
@@ -74,6 +74,7 @@ const WorkspacesPage: React.FC = () => {
   return (
     <Container>
       <Typography variant="h4" gutterBottom>Workspaces</Typography>
+      <Typography variant="h6" gutterBottom>Welcome, {user.username}</Typography>
       <Grid container spacing={3}>
         {workspaces.map((workspace) => (
           <Grid item xs={12} sm={6} md={4} key={workspace.name}>
@@ -87,7 +88,7 @@ const WorkspacesPage: React.FC = () => {
                 </Typography>
               </CardContent>
               <CardActions>
-                <Button size="small" onClick={() => navigate(`/workspaces/name/${workspace.name}`)}>View Projects</Button>
+                <Button size="small" onClick={() => navigate(`/workspaces/${workspace.name}/editor`)}>View Projects</Button>
               </CardActions>
             </Card>
           </Grid>

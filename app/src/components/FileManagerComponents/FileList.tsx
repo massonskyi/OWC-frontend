@@ -1,29 +1,35 @@
 import React from "react";
 import FileItem from "./FileItem";
+import { Stack } from "@mui/material";
+
+interface IFile {
+  id: number;
+  name: string;
+  filename: string; // Add filename property
+  type: 'file' | 'folder'; // Add type property
+  size?: number; // Optional size for files
+  children?: IFile[]; // Children for folders
+}
 interface IFileListProps {
-    files: {
-      id: number;
-      name: string;
-      filename: string;
-      [key: string]: any;
-    }[];
-    onDelete: (file: any) => void;
-    onDownload: (file: any) => void;
-    onDoubleClick: (file: any) => void;
-  }
+  files: IFile[];
+  onDelete: (id: number) => void;
+  onDownload: (id: number) => void;
+  onDoubleClick: (id: number) => void;
+}
+
 const FileList: React.FC<IFileListProps> = ({ files, onDelete, onDownload, onDoubleClick }) => {
   return (
-    <div className="file-list">
+    <Stack spacing={1}>
       {files.map((file) => (
         <FileItem
-          key={file.id} // Unique key prop set to file.id
+          key={file.id}
           file={file}
           onDelete={onDelete}
           onDownload={onDownload}
-          onDoubleClick={onDoubleClick} // Pass to FileItem
+          onDoubleClick={onDoubleClick}
         />
       ))}
-    </div>
+    </Stack>
   );
 };
 

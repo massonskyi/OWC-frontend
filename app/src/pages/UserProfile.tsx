@@ -364,7 +364,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
           <Grid container spacing={2}>
             {serverWorkspaces.map((workspace) => (
               <Grid item xs={12} sm={6} md={4} key={workspace.name}>
-                  <Link to={`/workspaces/${workspace.name}`} style={{ textDecoration: 'none' }}>
+                  <Link to={`/workspaces/${workspace.name}/editor`} style={{ textDecoration: 'none' }}>
                     <Paper
                       sx={{ 
                         p: 2, 
