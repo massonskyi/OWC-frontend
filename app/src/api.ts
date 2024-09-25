@@ -1,3 +1,4 @@
+import { wordHover } from './components/TextEditorComponents/UserTextEditor';
 // import { getWorkspace } from './api'; // Remove this line as it causes a conflict
 import axios, { AxiosResponse } from 'axios';
 
@@ -21,14 +22,24 @@ interface ExecCodeData {
   code: string;
   language: string;
 }
+
 export interface Workspace {
-  files: any;
-  id(id: any): void;
-  is_active: boolean;
-  is_public: boolean;
+
+  id: number;
+
   name: string;
+
   description: string;
+
+  files?: any[];
+
+  is_active: boolean;
+
+  is_public: boolean;
+
+
 }
+
 export interface WorkspaceCreateData {
   is_public: any;
   is_active: any;
@@ -52,7 +63,8 @@ export interface ProjectCreateData {
 
 // Интерфейс для запросов на создание файла или папки
 export interface CreateRequest {
-  name: string; // Имя файла или папки
+  workspace_name: string
+  filename: string; // Имя файла или папки
 }
 
 // Интерфейс для ответа на создание файла или папки
@@ -63,6 +75,7 @@ export interface CreateResponse {
 
 // Интерфейс для запросов на копирование файла или папки
 export interface CopyRequest {
+  workspace_name: string
   src: string; // Исходный путь файла или папки
   dst: string; // Назначение копии (путь)
 }
@@ -75,6 +88,7 @@ export interface CopyResponse {
 
 // Интерфейс для запросов на удаление файла или папки
 export interface DeleteRequest {
+  workspace_name: string
   path: string; // Путь к файлу или папке для удаления
 }
 
@@ -86,6 +100,7 @@ export interface DeleteResponse {
 
 // Интерфейс для запросов на переименование файла или папки
 export interface RenameRequest {
+  workspace_name: string
   old_name: string; // Старое имя файла или папки
   new_name: string; // Новое имя файла или папки
 }
@@ -98,7 +113,8 @@ export interface RenameResponse {
 
 // Интерфейс для запросов на редактирование файла
 export interface EditFileRequest {
-  name: string; // Имя файла
+  workspace_name: string
+  filename: string; // Имя файла
   content: string; // Новое содержимое файла
 }
 
@@ -338,35 +354,29 @@ export const getWorkspaces = async (): Promise<Workspace[]> => {
     throw error;
   }
 };
-// Функция для создания файла в рабочей области
-export const createFile = async (workspaceName: string, fileName: string): Promise<CreateResponse> => {
+export const createFile = async (workspaceName: string, filePath: string): Promise<GenericResponse> => {
   try {
-    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/file`;
-    const requestData: CreateRequest = {
-      name: fileName,
-    };
-    const response: AxiosResponse<CreateResponse> = await axios.post(url, requestData, {
-      headers: {
-        ...getAuthHeaders(),
-        'Content-Type': 'application/json',
-      },
-      withCredentials: true,
-    });
-    return response.data;
+      const url = `${SERVER_URL}/user/workspaces/${workspaceName}/file?filename=${encodeURIComponent(filePath)}`;
+      const response: AxiosResponse<GenericResponse> = await axios.post(url, null, {
+          headers: {
+              ...getAuthHeaders(),
+              'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+      });
+      return response.data;
   } catch (error: any) {
-    console.error('Create File Error:', error.response ? error.response.data : error.message);
-    throw error;
+      console.error('Create File Error:', error.response ? error.response.data : error.message);
+      throw error;
   }
 };
 
 // Функция для создания папки в рабочей области
-export const createFolder = async (workspaceName: string, folderName: string): Promise<CreateResponse> => {
+export const createFolder = async (workspaceName: string, folderPath: string): Promise<GenericResponse> => {
   try {
     const url = `${SERVER_URL}/user/workspaces/${workspaceName}/folder`;
-    const requestData: CreateRequest = {
-      name: folderName,
-    };
-    const response: AxiosResponse<CreateResponse> = await axios.post(url, requestData, {
+    const requestData = { foldername: folderPath }; // Теперь передаём путь папки
+    const response: AxiosResponse<GenericResponse> = await axios.post(url, requestData, {
       headers: {
         ...getAuthHeaders(),
         'Content-Type': 'application/json',
@@ -379,15 +389,11 @@ export const createFolder = async (workspaceName: string, folderName: string): P
     throw error;
   }
 };
-
 // Функция для копирования файла или папки в рабочей области
-export const copyItem = async (workspaceName: string, src: string, dst: string): Promise<GenericResponse> => {
+export const copyItem = async (workspaceName: string, srcPath: string, dstPath: string): Promise<GenericResponse> => {
   try {
     const url = `${SERVER_URL}/user/workspaces/${workspaceName}/copy`;
-    const requestData: CopyRequest = {
-      src,
-      dst,
-    };
+    const requestData = { src: srcPath, dst: dstPath }; // Передаём пути с вложенными директориями
     const response: AxiosResponse<GenericResponse> = await axios.post(url, requestData, {
       headers: {
         ...getAuthHeaders(),
@@ -401,20 +407,15 @@ export const copyItem = async (workspaceName: string, src: string, dst: string):
     throw error;
   }
 };
-
 // Функция для удаления файла или папки в рабочей области
-export const deleteItem = async (workspaceName: string, path: string): Promise<GenericResponse> => {
+export const deleteItem = async (workspaceName: string, itemPath: string): Promise<GenericResponse> => {
   try {
-    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/item`;
-    const requestData: DeleteRequest = {
-      path,
-    };
+    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/item?path=${encodeURIComponent(itemPath)}`;
     const response: AxiosResponse<GenericResponse> = await axios.delete(url, {
       headers: {
         ...getAuthHeaders(),
         'Content-Type': 'application/json',
       },
-      data: requestData,
       withCredentials: true,
     });
     return response.data;
@@ -425,13 +426,10 @@ export const deleteItem = async (workspaceName: string, path: string): Promise<G
 };
 
 // Функция для переименования файла или папки в рабочей области
-export const renameItem = async (workspaceName: string, oldName: string, newName: string): Promise<GenericResponse> => {
+export const renameItem = async (workspaceName: string, oldPath: string, newPath: string): Promise<GenericResponse> => {
   try {
     const url = `${SERVER_URL}/user/workspaces/${workspaceName}/rename`;
-    const requestData: RenameRequest = {
-      old_name: oldName,
-      new_name: newName,
-    };
+    const requestData = { old_name: oldPath, new_name: newPath }; // Передаём старое и новое имя пути
     const response: AxiosResponse<GenericResponse> = await axios.put(url, requestData, {
       headers: {
         ...getAuthHeaders(),
@@ -447,13 +445,10 @@ export const renameItem = async (workspaceName: string, oldName: string, newName
 };
 
 // Функция для редактирования содержимого файла в рабочей области
-export const editFile = async (workspaceName: string, fileName: string, content: string): Promise<GenericResponse> => {
+export const editFile = async (workspaceName: string, filename: string, content: string): Promise<GenericResponse> => {
   try {
     const url = `${SERVER_URL}/user/workspaces/${workspaceName}/file`;
-    const requestData: EditFileRequest = {
-      name: fileName,
-      content,
-    };
+    const requestData = { filename, content }; // Pass filename and content in body
     const response: AxiosResponse<GenericResponse> = await axios.put(url, requestData, {
       headers: {
         ...getAuthHeaders(),
@@ -467,10 +462,11 @@ export const editFile = async (workspaceName: string, fileName: string, content:
     throw error;
   }
 };
+
 // Функция для открытия файла в рабочей области
-export const openFile = async (workspaceName: string, fileName: string): Promise<string> => {
+export const openFile = async (workspaceName: string, filePath: string): Promise<string> => {
   try {
-    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/file/${fileName}`;
+    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/file/${encodeURIComponent(filePath)}`;
     const response: AxiosResponse<{ contents: string }> = await axios.get(url, {
       headers: {
         ...getAuthHeaders(),

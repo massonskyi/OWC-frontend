@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { langs } from "@uiw/codemirror-extensions-langs";
@@ -15,6 +15,8 @@ import {
   materialDark,
   kimbie
 } from "@uiw/codemirror-themes-all";
+import { SelectChangeEvent } from "@mui/material";
+  
 import { linter, Diagnostic } from "@codemirror/lint";
 import { syntaxTree } from "@codemirror/language";
 import { ICodeChangeHandler } from "../../interfaces/ITextEditor/ICodeChangeHandler";
@@ -26,6 +28,7 @@ import { Box, Typography, Divider, Tabs, Tab, IconButton } from "@mui/material";
 import { Tooltip, showTooltip, hoverTooltip, showPanel, Panel, keymap } from "@codemirror/view";
 import { StateField, StateEffect, EditorState, Text } from "@codemirror/state";
 import CloseIcon from '@mui/icons-material/Close';
+import ThemeSelection from "./ThemeSelection";
 
 const regexpLinter = linter((view: EditorView) => {
   let diagnostics: Diagnostic[] = [];
@@ -47,7 +50,7 @@ const regexpLinter = linter((view: EditorView) => {
 });
 
 // Функция для создания панели помощи
-function createHelpPanel(view: EditorView) {
+function createHelpPanel() {
   let dom = document.createElement("div");
   dom.textContent = "F1: Toggle the help panel";
   dom.className = "cm-help-panel";
@@ -122,12 +125,12 @@ export const wordHover = hoverTooltip((view: EditorView, pos, side) => {
   let start = pos, end = pos;
   while (start > from && /\w/.test(text[start - from - 1])) start--;
   while (end < to && /\w/.test(text[end - from])) end++;
-  if (start === pos && side < 0 || end === pos && side > 0) return null;
+  if ((start === pos && side < 0) || (end === pos && side > 0)) return null;
   return {
     pos: start,
     end,
     above: true,
-    create(view: EditorView) {
+    create() {
       let dom = document.createElement("div");
       dom.textContent = text.slice(start - from, end - from);
       return { dom };
@@ -176,7 +179,8 @@ export const UserTextEditor: React.FC = () => {
     });
   };
 
-  const handleThemeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+
+  const handleThemeChange = (event: SelectChangeEvent<string>) => {
     const selectedTheme = themeList.find(theme => theme.name === event.target.value);
     if (selectedTheme) {
       setTheme(selectedTheme.theme);
@@ -249,7 +253,6 @@ export const UserTextEditor: React.FC = () => {
     };
 
     const mode = modes[selectedLanguage] || langs.python;
-    console.log(`Selected language: ${selectedLanguage}, Mode:`, mode);
 
     return mode();
   };
@@ -266,7 +269,7 @@ export const UserTextEditor: React.FC = () => {
     });
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
 
@@ -276,6 +279,10 @@ export const UserTextEditor: React.FC = () => {
       // Обновляем активную вкладку
       if (activeTab >= index && activeTab > 0) {
         setActiveTab(activeTab - 1);
+      } else if (activeTab >= index && activeTab === 0 && newTabs.length > 0) {
+        setActiveTab(0);
+      } else if (activeTab >= index && newTabs.length === 0) {
+        setActiveTab(-1);
       }
       return newTabs;
     });
@@ -301,13 +308,7 @@ export const UserTextEditor: React.FC = () => {
         <Box display="flex" gap={2}>
           <ExecBtn code={tabs[activeTab]?.code || ""} language={tabs[activeTab]?.language || "python"} onOutput={handlerOutput} />
           <LanguageSelection onSelectionChange={updateCodeMirrorMode} />
-          <select onChange={handleThemeChange}>
-            {themeList.map((theme) => (
-              <option key={theme.name} value={theme.name}>
-                {theme.name}
-              </option>
-            ))}
-          </select>
+            <ThemeSelection themeList={themeList} handleThemeChange={handleThemeChange} />
         </Box>
         <Typography variant="h6" sx={{ color: "#fff", marginLeft: 2 }}>
           {workspaceName}
@@ -356,7 +357,7 @@ export const UserTextEditor: React.FC = () => {
         <Divider orientation="vertical" flexItem sx={{ backgroundColor: "#000" }} />
 
         <Box flex={2} padding={2} sx={{ backgroundColor: "#282828" }}>
-          <FileListComponent onCodeLoaded={(code) => handleCodeLoaded("filename", code)} workspaceName={workspaceName || ""} />
+          <FileListComponent onCodeLoaded={(code, filename) => handleCodeLoaded(filename, code)} workspaceName={workspaceName || ""} />
         </Box>
       </Box>
     </Box>

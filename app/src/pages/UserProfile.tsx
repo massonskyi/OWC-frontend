@@ -345,16 +345,63 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
                   >
                     <ListItem>
                       <ListItemText
-                        primary={workspace.name}
-                        secondary={workspace.description}
+                      primary={
+                        <TextField
+                        value={workspace.name}
+                        onChange={(e) => {
+                          const updatedWorkspaces = workspaces.map((ws) =>
+                          ws.name === workspace.name
+                            ? { ...ws, name: e.target.value }
+                            : ws
+                          );
+                          setServerWorkspaces(
+                            updatedWorkspaces.map((ws) => ({
+                              ...ws,
+                              files: ws.files || [],
+                              is_active: ws.is_active ?? true,
+                              is_public: ws.is_public ?? true,
+                            })) as Workspace[]
+                          );
+                        }}
+                        fullWidth
+                        variant="outlined"
+                        margin="normal"
+                        disabled={!isCurrentUser}
+                        />
+                      }
+                      secondary={
+                        <TextField
+                        value={workspace.description}
+                        onChange={(e) => {
+                          const updatedWorkspaces = workspaces.map((ws) =>
+                          ws.name === workspace.name
+                            ? { ...ws, description: e.target.value }
+                            : ws
+                          );
+                          setServerWorkspaces(
+                            updatedWorkspaces.map((ws) => ({
+                              ...ws,
+                              is_active: ws.is_active ?? true,
+                              is_public: ws.is_public ?? true,
+                            })) as Workspace[]
+                          );
+                        }}
+                        fullWidth
+                        variant="outlined"
+                        margin="normal"
+                        disabled={!isCurrentUser}
+                        />
+                      }
                       />
                       {isCurrentUser && (
+                      <Box display="flex" alignItems="center">
                         <IconButton
-                          onClick={() => handleDeleteWorkspace(workspace.id as number)}
-                          color="secondary"
+                        onClick={() => handleDeleteWorkspace(workspace.id as number)}
+                        color="secondary"
                         >
-                          <Delete />
+                        <Delete />
                         </IconButton>
+                      </Box>
                       )}
                     </ListItem>
                   </Paper>

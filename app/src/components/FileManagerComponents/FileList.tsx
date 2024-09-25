@@ -3,21 +3,31 @@ import FileItem from "./FileItem";
 import { Stack } from "@mui/material";
 
 interface IFile {
-  id: number;
+
+  id: string;
+
   name: string;
-  filename: string; // Add filename property
-  type: 'file' | 'folder'; // Add type property
-  size?: number; // Optional size for files
-  children?: IFile[]; // Children for folders
+
+  filename: string;
+
+  type: 'file' | 'folder';
+
+  size?: number;
+
+  children?: IFile[];
+
+  contents?: string;
+
 }
 interface IFileListProps {
   files: IFile[];
-  onDelete: (id: number) => void;
-  onDownload: (id: number) => void;
-  onDoubleClick: (id: number) => void;
+  onDelete: (id: string) => void;
+  onDownload: (id: string) => void;
+  onDoubleClick: (id: string) => void;
+  onContextMenu: (event: React.MouseEvent, id: string) => void; // Add onContextMenu property
 }
 
-const FileList: React.FC<IFileListProps> = ({ files, onDelete, onDownload, onDoubleClick }) => {
+const FileList: React.FC<IFileListProps> = ({ files, onDelete, onDownload, onDoubleClick, onContextMenu }) => {
   return (
     <Stack spacing={1}>
       {files.map((file) => (
@@ -27,6 +37,7 @@ const FileList: React.FC<IFileListProps> = ({ files, onDelete, onDownload, onDou
           onDelete={onDelete}
           onDownload={onDownload}
           onDoubleClick={onDoubleClick}
+          onContextMenu={onContextMenu} // Pass onContextMenu to FileItem
         />
       ))}
     </Stack>

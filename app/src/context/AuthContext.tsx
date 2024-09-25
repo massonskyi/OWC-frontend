@@ -10,7 +10,11 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   currentUserId: number | null;
-  workspaces: Array<{ id: number; name: string; description: string }>;
+  workspaces: Array<{
+    files: never[];
+    is_public: boolean;
+    is_active: boolean; id: number; name: string; description: string 
+}>;
   fetchUserWorkspaces: () => void;
   addWorkspace: (workspace: { name: string; description: string; is_public: boolean; is_active: boolean }) => void;
   deleteWorkspace: (workspaceId: number) => void;
@@ -22,7 +26,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [workspaces, setWorkspaces] = useState<Array<{ id: number; name: string; description: string, is_active: boolean, is_public: boolean}>>([]);
+  const [workspaces, setWorkspaces] = useState<Array<{ id: number; name: string; description: string, is_active: boolean, is_public: boolean, files: never[] }>>([]);
   const [isLoading, setIsLoading] = useState(true); // Состояние для отслеживания загрузки
 
   const login = (userData: any, token: string) => {
@@ -76,7 +80,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const addWorkspace = async (workspace: { name: string; description: string; is_public: boolean; is_active: boolean; }) => {
     try {
       const newWorkspace = await createWorkspace(workspace);
-      setWorkspaces([...workspaces, newWorkspace]);
+      setWorkspaces([...workspaces, { ...newWorkspace, files: [] }]);
       toast.success('Воркспейс успешно создан');
     } catch (error: any) {
       console.error('Error adding workspace:', error);

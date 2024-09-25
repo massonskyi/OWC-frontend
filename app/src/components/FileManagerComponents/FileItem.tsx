@@ -21,24 +21,25 @@ import { faPython, faCuttlefish, faGolang } from "@fortawesome/free-brands-svg-i
 import { faFileCode } from "@fortawesome/free-solid-svg-icons";
 
 interface IFile {
-  id: number;
+  id: string;
   name: string;
   filename: string;
   type: 'file' | 'folder';
   size?: number;
   children?: IFile[];
+  contents?: string;
 }
 
 interface IFileItemProps {
   file: IFile;
-  onDelete: (id: number) => void;
-  onDownload: (id: number) => void;
-  onDoubleClick: (id: number) => void;
+  onDelete: (fileId: string) => void;
+  onDownload: (fileId: string) => void;
+  onDoubleClick: (fileId: string) => void;
+  onContextMenu: (event: React.MouseEvent, fileId: string) => void;
 }
 
-const FileItem: React.FC<IFileItemProps> = ({ file, onDelete, onDownload, onDoubleClick }) => {
+const FileItem: React.FC<IFileItemProps> = ({ file, onDelete, onDownload, onDoubleClick, onContextMenu }) => {
   const [showButtons, setShowButtons] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const getIcon = (filename: string, type: 'file' | 'folder') => {
     if (type === 'folder') return <FolderIcon />; // Возвращаем иконку папки для папок
@@ -64,15 +65,6 @@ const FileItem: React.FC<IFileItemProps> = ({ file, onDelete, onDownload, onDoub
     }
   };
 
-  const handleContextMenu = (event: MouseEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   return (
     <Stack
       direction="row"
@@ -80,8 +72,8 @@ const FileItem: React.FC<IFileItemProps> = ({ file, onDelete, onDownload, onDoub
       spacing={1}
       onMouseEnter={() => setShowButtons(true)}
       onMouseLeave={() => setShowButtons(false)}
-      onDoubleClick={() => onDoubleClick(file.id)} // Раскрываем папку при двойном клике
-      onContextMenu={handleContextMenu}
+      onDoubleClick={() => onDoubleClick(file.id.toString())} // Раскрываем папку при двойном клике
+      onContextMenu={(event) => onContextMenu(event, file.id.toString())}
       sx={{ padding: 1, borderBottom: "1px solid #ccc", cursor: 'pointer' }}
     >
       {getIcon(file.filename, file.type)}
@@ -90,22 +82,14 @@ const FileItem: React.FC<IFileItemProps> = ({ file, onDelete, onDownload, onDoub
       </Typography>
       {file.type === 'file' && showButtons && (
         <>
-          <IconButton onClick={() => onDownload(file.id)} color="primary">
+          <IconButton onClick={() => onDownload(file.id.toString())} color="primary">
             <GetAppIcon />
           </IconButton>
-          <IconButton onClick={() => onDelete(file.id)} color="error">
+          <IconButton onClick={() => onDelete(file.id.toString())} color="error">
             <DeleteIcon />
           </IconButton>
         </>
       )}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-      >
-        <MenuItem onClick={() => { onDownload(file.id); handleClose(); }}>Download</MenuItem>
-        <MenuItem onClick={() => { onDelete(file.id); handleClose(); }}>Delete</MenuItem>
-      </Menu>
     </Stack>
   );
 };
