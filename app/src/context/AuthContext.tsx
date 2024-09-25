@@ -17,7 +17,7 @@ interface AuthContextType {
 }>;
   fetchUserWorkspaces: () => void;
   addWorkspace: (workspace: { name: string; description: string; is_public: boolean; is_active: boolean }) => void;
-  deleteWorkspace: (workspaceId: number) => void;
+  deleteWorkspaceFromStorage: (workspaceName: string) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -93,8 +93,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const deleteWorkspace = (workspaceId: number) => {
-    setWorkspaces(workspaces.filter(workspace => workspace.id !== workspaceId));
+  const deleteWorkspaceFromStorage = (workspaceName: string) => {
+    setWorkspaces(workspaces.filter(workspace => workspace.name !== workspaceName));
     toast.success('Воркспейс успешно удален');
   };
 
@@ -116,7 +116,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       workspaces, 
       fetchUserWorkspaces, 
       addWorkspace, 
-      deleteWorkspace 
+      deleteWorkspaceFromStorage 
     }}>
       {children}
       <Toaster />

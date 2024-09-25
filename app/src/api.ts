@@ -354,6 +354,38 @@ export const getWorkspaces = async (): Promise<Workspace[]> => {
     throw error;
   }
 };
+export const deleteWorkspace = async (workspaceName: string) => {
+  if (!workspaceName) {
+    console.error('Workspace name is undefined or empty');
+    throw new Error('Workspace name is required');
+  }
+
+  try {
+    const url = `${SERVER_URL}/user/workspaces/${workspaceName}`;
+
+    const response: AxiosResponse<{ message: string }> = await axios.delete(
+      url,
+      {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        console.error('Workspace not found:', error);
+      } else if (error.response?.status === 500) {
+        console.error('Server error:', error);
+      } else {
+        console.error('Error deleting workspace:', error);
+      }
+    } else {
+      console.error('Unexpected error:', error);
+    }
+    throw error;
+  }
+};
 export const createFile = async (workspaceName: string, filePath: string): Promise<GenericResponse> => {
   try {
       const url = `${SERVER_URL}/user/workspaces/${workspaceName}/file?filename=${encodeURIComponent(filePath)}`;

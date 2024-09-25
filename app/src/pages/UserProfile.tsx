@@ -22,9 +22,8 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { Add, Delete } from "@mui/icons-material";
-import { createWorkspace, getWorkspaces, Workspace } from "../api"; // Импортируем API-запросы
+import { createWorkspace, getWorkspaces, Workspace,deleteWorkspace } from "../api"; // Импортируем API-запросы
 import Loader from "../components/Loader";
-
 interface UserProfileProps {
   user: {
     id: number;
@@ -45,7 +44,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
     workspaces = [],
     fetchUserWorkspaces,
     addWorkspace,
-    deleteWorkspace,
+    deleteWorkspaceFromStorage,
   } = useAuth();
   const [value, setValue] = useState(0);
   const [formData, setFormData] = useState(user ? { ...user } : null);
@@ -55,7 +54,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
   const [newWorkspaceIsPublic, setNewWorkspaceIsPublic] = useState(true);
   const [isLoading, setIsLoading] = useState(true); // Состояние для отслеживания загрузки
   const [serverWorkspaces, setServerWorkspaces] = useState<Workspace[]>([]); // Состояние для воркспейсов с сервера
-
+  
   const isCurrentUser = user && user.id === currentUserId;
 
   useEffect(() => {
@@ -121,10 +120,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
     }
   };
 
-  const handleDeleteWorkspace = async (workspaceId: number) => {
+  const handleDeleteWorkspace = async (workspaceName: string) => {
     try {
-      await deleteWorkspace(workspaceId);
-      deleteWorkspace(workspaceId);
+      await deleteWorkspace(workspaceName);
+      deleteWorkspaceFromStorage(workspaceName);
     } catch (error) {
       console.error("Error deleting workspace:", error);
     }
@@ -328,86 +327,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
               </Box>
             </Box>
           )}
-          <Divider sx={{ my: 3 }} />
-            <Grid container spacing={2}>
-              {workspaces.map((workspace) => (
-                <Grid item xs={12} sm={6} md={4} key={workspace.name}>
-                  <Paper
-                    sx={{ 
-                      p: 2, 
-                      borderRadius: 1, 
-                      bgcolor: "background.paper",
-                      transition: "transform 0.3s",
-                      "&:hover": {
-                        transform: "scale(1.05)"
-                      }
-                    }}
-                  >
-                    <ListItem>
-                      <ListItemText
-                      primary={
-                        <TextField
-                        value={workspace.name}
-                        onChange={(e) => {
-                          const updatedWorkspaces = workspaces.map((ws) =>
-                          ws.name === workspace.name
-                            ? { ...ws, name: e.target.value }
-                            : ws
-                          );
-                          setServerWorkspaces(
-                            updatedWorkspaces.map((ws) => ({
-                              ...ws,
-                              files: ws.files || [],
-                              is_active: ws.is_active ?? true,
-                              is_public: ws.is_public ?? true,
-                            })) as Workspace[]
-                          );
-                        }}
-                        fullWidth
-                        variant="outlined"
-                        margin="normal"
-                        disabled={!isCurrentUser}
-                        />
-                      }
-                      secondary={
-                        <TextField
-                        value={workspace.description}
-                        onChange={(e) => {
-                          const updatedWorkspaces = workspaces.map((ws) =>
-                          ws.name === workspace.name
-                            ? { ...ws, description: e.target.value }
-                            : ws
-                          );
-                          setServerWorkspaces(
-                            updatedWorkspaces.map((ws) => ({
-                              ...ws,
-                              is_active: ws.is_active ?? true,
-                              is_public: ws.is_public ?? true,
-                            })) as Workspace[]
-                          );
-                        }}
-                        fullWidth
-                        variant="outlined"
-                        margin="normal"
-                        disabled={!isCurrentUser}
-                        />
-                      }
-                      />
-                      {isCurrentUser && (
-                      <Box display="flex" alignItems="center">
-                        <IconButton
-                        onClick={() => handleDeleteWorkspace(workspace.id as number)}
-                        color="secondary"
-                        >
-                        <Delete />
-                        </IconButton>
-                      </Box>
-                      )}
-                    </ListItem>
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
           <Grid container spacing={2}>
             {serverWorkspaces.map((workspace) => (
               <Grid item xs={12} sm={6} md={4} key={workspace.name}>
@@ -430,7 +349,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
                         />
                         {isCurrentUser && (
                           <IconButton
-                            onClick={() => handleDeleteWorkspace(workspace.id as unknown as number)}
+                            onClick={() => handleDeleteWorkspace(workspace.name)}
                             color="secondary"
                           >
                             <Delete />
