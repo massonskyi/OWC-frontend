@@ -294,7 +294,7 @@ export const createWorkspace = async (workspaceData: { name: string; description
         params,
         withCredentials: true
       });
-      return response.data;
+      return response.data.workspace;
   } catch (error: any) {
       console.error('Create Workspace Error:', error.response ? error.response.data : error.message);
       if (error.response && error.response.data && error.response.data.detail) {
@@ -314,7 +314,7 @@ export const getWorkspaceByName = async (workspaceName: string): Promise<Workspa
       withCredentials: true
     });
     console.log(response.data)
-    return response.data; 
+    return response.data;
   }catch(error: any){
     console.error('Get Workspace By Name Error:', error.response ? error.response.data : error.message);
     throw error;
@@ -406,9 +406,8 @@ export const createFile = async (workspaceName: string, filePath: string): Promi
 // Функция для создания папки в рабочей области
 export const createFolder = async (workspaceName: string, folderPath: string): Promise<GenericResponse> => {
   try {
-    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/folder`;
-    const requestData = { foldername: folderPath }; // Теперь передаём путь папки
-    const response: AxiosResponse<GenericResponse> = await axios.post(url, requestData, {
+    const url = `${SERVER_URL}/user/workspaces/${workspaceName}/folder?foldername=${encodeURIComponent(folderPath)}`;
+    const response: AxiosResponse<GenericResponse> = await axios.post(url, null, {
       headers: {
         ...getAuthHeaders(),
         'Content-Type': 'application/json',

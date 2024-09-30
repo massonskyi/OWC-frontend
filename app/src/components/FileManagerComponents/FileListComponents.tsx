@@ -24,7 +24,9 @@ const FileListComponent: React.FC<IFileListComponentProps> = ({ onCodeLoaded, wo
   const [files, setFiles] = useState<IFile[]>([]);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [newFileName, setNewFileName] = useState("");
+  const [newFolderName, setNewFolderName] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  const [openDialogFolder, setDialogFolder] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number; fileId: string | null } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -309,41 +311,42 @@ const FileListComponent: React.FC<IFileListComponentProps> = ({ onCodeLoaded, wo
         </DialogActions>
         
       </Dialog>
-      {/* <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Создать новый файл</DialogTitle>
+      <Dialog open={openDialogFolder} onClose={() => setDialogFolder(false)}>
+        <DialogTitle>Создать новую папку</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
-            label="Имя файла"
+            label="Имя папки"
             fullWidth
-            value={newFileName}
-            onChange={(e) => setNewFileName(e.target.value)}
+            value={newFolderName}
+            onChange={(e) => setNewFolderName(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="primary">
+          <Button onClick={() => setDialogFolder(false)} color="primary">
             Отмена
           </Button>
-          <Button onClick={handleCreateNewFile} color="primary">
+          <Button onClick={handleCreateNewFolder} color="primary">
             Создать
           </Button>
         </DialogActions>
-        
-      </Dialog> */}
+
+      </Dialog>
       <Menu
           open={contextMenu !== null}
           onClose={handleCloseContextMenu}
           anchorReference="anchorPosition"
           anchorPosition={
             contextMenu !== null
-              ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
-              : undefined
+                ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+                : undefined
           }
-        >
+          aria-hidden={contextMenu === null} // Ensure menu is not hidden when it is open
+      >
           <MenuItem onClick={() => handleOpen(contextMenu?.fileId || '')}>Открыть</MenuItem>
           <MenuItem onClick={() => handleSave(contextMenu?.fileId || '', files.find(file => file.id === contextMenu?.fileId)?.contents || '')}>Сохранить</MenuItem>
-          <MenuItem onClick={() => handleCreateNewFolder()}>Создать папку</MenuItem>
+          <MenuItem onClick={() =>  setDialogFolder(true)}>Создать папку</MenuItem>
           <MenuItem onClick={() => contextMenu && handleRename(contextMenu.fileId!, prompt('Введите новое имя') || '')}>Редактировать</MenuItem>
           <MenuItem onClick={() => contextMenu && handleCopy(contextMenu.fileId!, prompt('Введите путь назначения') || '')}>Копировать</MenuItem>
           <MenuItem onClick={() => contextMenu && handleDelete(contextMenu.fileId!)}>Удалить</MenuItem>
